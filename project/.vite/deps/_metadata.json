@@ -1,0 +1,32 @@
+{
+  "hash": "58a0f5f6",
+  "browserHash": "b63d6010",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "44c447d5",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "9d6e465d",
+      "needsInterop": true
+    },
+    "ag-grid-react": {
+      "src": "../../node_modules/ag-grid-react/lib/main.js",
+      "file": "ag-grid-react.js",
+      "fileHash": "7a7a1777",
+      "needsInterop": true
+    }
+  },
+  "chunks": {
+    "chunk-3ADA7GBC": {
+      "file": "chunk-3ADA7GBC.js"
+    },
+    "chunk-SGI7XJUV": {
+      "file": "chunk-SGI7XJUV.js"
+    }
+  }
+}
