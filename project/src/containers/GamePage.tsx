@@ -12,15 +12,25 @@ const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
   const columnDefs = [
     {
       headerName: "Deltager",
-      field: "player", // This field should match the player name in rowData
+      field: "player",
+      sortable: true,
     },
     ...games.games.map((game) => ({
       headerName: game.name,
       field: game.name,
-      cellStyle: { textAlign: "right" }, // Right-align the text
+      cellStyle: { textAlign: "right" },
       width: 100,
       autoHeaderHeight: true,
-      sortable: true, // Allow sorting by the Total column
+      sortable: true,
+      editable: true,
+      singleClickEdit: true,
+      cellEditor: "agNumberCellEditor",
+      cellEditorParams: {
+        min: 1,
+        max: games.players.length,
+        precision: 0,
+      },
+      cellDataType: "number",
     })),
     {
       headerName: "Total",
@@ -34,7 +44,8 @@ const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
       cellStyle: { textAlign: "right" },
       width: 100,
       autoHeaderHeight: true,
-      sortable: true, // Allow sorting by the Total column
+      sortable: true,
+      cellDataType: "number",
     },
   ];
 

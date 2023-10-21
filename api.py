@@ -55,11 +55,9 @@ app.add_middleware(
 
 @app.get("/")
 async def root(date: str) -> Games:
-    print(date)
+    print("Called /: ", date)
     for bjorligame in games:
-        print(date, bjorligame.date, date==bjorligame.date)
         if date == bjorligame.date:
-
             return bjorligame
     return Games(
         date='1970-01',
@@ -67,5 +65,5 @@ async def root(date: str) -> Games:
 
 @app.get("/dates")
 async def get_dates() -> List[str]:
-    print([g.date for g in games])
+    print("Called /dates: ", [g.date for g in games])
     return [g.date for g in games]
