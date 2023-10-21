@@ -20,7 +20,22 @@ const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
       cellStyle: { textAlign: "right" }, // Right-align the text
       width: 100,
       autoHeaderHeight: true,
+      sortable: true, // Allow sorting by the Total column
     })),
+    {
+      headerName: "Total",
+      valueGetter: (params: any) => {
+        let total = 1;
+        games.games.forEach((game) => {
+          total *= params.data[game.name];
+        });
+        return total;
+      },
+      cellStyle: { textAlign: "right" },
+      width: 100,
+      autoHeaderHeight: true,
+      sortable: true, // Allow sorting by the Total column
+    },
   ];
 
   const rowData = games.players.map((player) => {
@@ -28,6 +43,7 @@ const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
     games.games.forEach((game) => {
       playerData[game.name] = game.scores[player];
     });
+
     return playerData;
   });
 
