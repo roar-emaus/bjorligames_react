@@ -6,19 +6,18 @@ import axios from "axios";
 async function fetchGamesData(date: string): Promise<Games> {
   try {
     const response = await axios.get<Games>(
-      `http://localhost:8000/?date=${date}`
+      `http://localhost:8000/date/${date}`
     );
-    // console.log(response);
     return response.data;
   } catch (error) {
     console.log(error);
     throw new Error("Failed to fetch data from the API");
   }
 }
+
 async function fetchDates(): Promise<string[]> {
   try {
     const response = await axios.get<string[]>("http://localhost:8000/dates");
-    // console.log(response);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -27,7 +26,8 @@ async function fetchDates(): Promise<string[]> {
 }
 
 function App() {
-  const today = new Date().toISOString().split("T")[0];
+  const [year, month] = new Date().toISOString().split("T")[0].split("-");
+  const today = `${year}-${month}`;
   const [games, setGames] = React.useState<Games>({
     date: today,
     games: [{ name: "No Game", scores: { "No player": 1 } }],
@@ -35,6 +35,7 @@ function App() {
   });
   const [date, setDate] = React.useState<string>(today);
   const [dates, setDates] = React.useState<string[]>([today]);
+
   React.useEffect(() => {
     async function getDates() {
       try {
@@ -73,10 +74,11 @@ function App() {
     };
   }, [date]);
 
-  const handleDateChange = (event: { target: { value: any } }) => {
+  const handleDateChange = (event: { target: { value: string } }) => {
     const selectedDate = event.target.value;
-    setDate(selectedDate); // Update the date state with the selected value
+    setDate(selectedDate);
   };
+
   return (
     <div>
       <select value={date} onChange={handleDateChange}>

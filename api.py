@@ -29,7 +29,6 @@ def start_up():
                 player_scores = player.strip().split(',')
                 players[player_scores[0]] = list(map(int ,player_scores[1:]))
             this_bjorligame = []
-            print(players)
             for game_index, game_name in enumerate(game_names):
                 this_bjorligame.append(
                     Game(name=game_name, scores={pn: s[game_index] for pn, s in players.items()})
@@ -53,9 +52,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
+
+@app.get("/date/{date}")
 async def root(date: str) -> Games:
-    print("Called /: ", date)
+    print(f"Called /date/{date}")
     for bjorligame in games:
         if date == bjorligame.date:
             return bjorligame
@@ -63,7 +63,8 @@ async def root(date: str) -> Games:
         date='1970-01',
         games=[Game(name='No name', scores={'No name': 0})], players=['No name'])
 
+
 @app.get("/dates")
 async def get_dates() -> List[str]:
     print("Called /dates: ", [g.date for g in games])
-    return [g.date for g in games]
+    return sorted([g.date for g in games])
