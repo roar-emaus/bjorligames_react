@@ -3,25 +3,24 @@ import BjorliGame from "./containers/GamePage";
 import { useDateState, useGamesState } from "./states/state";
 
 function App() {
-  const [date, dates, setDate] = useDateState();
-  const [games] = useGamesState(date);
-
+  const [dateState, setDateState] = useDateState();
+  const [gamesState] = useGamesState(dateState.date);
   return (
     <div>
       <select
-        value={date}
+        value={dateState.date}
         onChange={(event: React.ChangeEvent<HTMLSelectElement>) =>
-          setDate(event.target.value)
+          setDateState(event.target.value)
         }
       >
-        {dates.map((date, index) => (
+        {dateState.dates.map((date, index) => (
           <option key={index} value={date}>
             {date}
           </option>
         ))}
       </select>
       <div>
-        <BjorliGame games={games} />
+        <BjorliGame games={gamesState.games} />
       </div>
     </div>
   );

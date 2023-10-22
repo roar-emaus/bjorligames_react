@@ -2,9 +2,10 @@ import React, { useMemo } from "react";
 import "../App.css";
 import AgGridTable from "../components/Table.tsx";
 import { Games } from "../types/GameType.tsx";
+import { GamesState } from "../states/state.tsx";
 
 interface BjorliGameProps {
-  games: Games;
+  games: GamesState["games"];
 }
 
 interface RowData {
@@ -12,14 +13,29 @@ interface RowData {
   [key: string]: number | string;
 }
 
+interface ColumnDefinition {
+  headerName: string;
+  field?: string;
+  valueGetter?: (params: any) => any;
+  cellStyle?: object;
+  width?: number;
+  autoHeaderHeight?: boolean;
+  sortable?: boolean;
+  editable?: boolean;
+  singleClickEdit?: boolean;
+  cellEditor?: string;
+  cellEditorParams?: object;
+  cellDataType?: string;
+}
+
 function calculateTotalScore(games: Games, playerData: RowData): number {
   return games.games.reduce(
-    (total, game) => total + (playerData[game.name] as number),
-    0
+    (total, game) => total * (playerData[game.name] as number),
+    1
   );
 }
 
-function getColumnDefinitions(games: Games) {
+function getColumnDefinitions(games: Games): ColumnDefinition[] {
   const gameColumns = games.games.map((game) => ({
     headerName: game.name,
     field: game.name,
@@ -56,11 +72,13 @@ function getColumnDefinitions(games: Games) {
 }
 
 const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
+  const { date, players, games: gameData } = games;
+
   const columnDefs = useMemo(() => getColumnDefinitions(games), [games]);
 
   const rowData = useMemo(() => {
-    return games.players.map((player) => {
-      const playerData = games.games.reduce((data, game) => {
+    return players.map((player) => {
+      const playerData = gameData.reduce((data, game) => {
         data[game.name] = game.scores[player];
         return data;
       }, {} as Record<string, number>);
@@ -70,11 +88,11 @@ const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
         ...playerData,
       };
     });
-  }, [games]);
+  }, [gameData, players]);
 
   return (
     <div style={{ height: "500px" }}>
-      <h1>{games.date}</h1>
+      <h1>{date}</h1>
       <AgGridTable rowData={rowData} columnDefs={columnDefs} />
     </div>
   );
