@@ -52,6 +52,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/date/")
+async def root() -> Games:
+    return Games(
+        date='',
+        games=[Game(name='No name', scores={'No name': 0})], players=['No name'])
 
 @app.get("/date/{date}")
 async def root(date: str) -> Games:
@@ -60,7 +65,7 @@ async def root(date: str) -> Games:
         if date == bjorligame.date:
             return bjorligame
     return Games(
-        date='1970-01',
+        date='',
         games=[Game(name='No name', scores={'No name': 0})], players=['No name'])
 
 

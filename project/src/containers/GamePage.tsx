@@ -1,45 +1,50 @@
-import React from "react";
+import React, { useMemo } from "react";
 import "../App.css";
 import AgGridTable from "../components/Table.tsx";
 import { Games } from "../types/GameType.tsx";
 
-type BjorliGameProps = {
+interface BjorliGameProps {
   games: Games;
-};
+}
 
-const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
-  // console.log(games);
-  const columnDefs = [
-    {
-      headerName: "Deltager",
-      field: "player",
-      sortable: true,
+interface RowData {
+  player: string;
+  [key: string]: number | string;
+}
+
+function calculateTotalScore(games: Games, playerData: RowData): number {
+  return games.games.reduce(
+    (total, game) => total + (playerData[game.name] as number),
+    0
+  );
+}
+
+function getColumnDefinitions(games: Games) {
+  const gameColumns = games.games.map((game) => ({
+    headerName: game.name,
+    field: game.name,
+    cellStyle: { textAlign: "right" },
+    width: 100,
+    autoHeaderHeight: true,
+    sortable: true,
+    editable: true,
+    singleClickEdit: true,
+    cellEditor: "agNumberCellEditor",
+    cellEditorParams: {
+      min: 1,
+      max: games.players.length,
+      precision: 0,
     },
-    ...games.games.map((game) => ({
-      headerName: game.name,
-      field: game.name,
-      cellStyle: { textAlign: "right" },
-      width: 100,
-      autoHeaderHeight: true,
-      sortable: true,
-      editable: true,
-      singleClickEdit: true,
-      cellEditor: "agNumberCellEditor",
-      cellEditorParams: {
-        min: 1,
-        max: games.players.length,
-        precision: 0,
-      },
-      cellDataType: "number",
-    })),
+    cellDataType: "number",
+  }));
+
+  return [
+    { headerName: "Deltager", field: "player", sortable: true },
+    ...gameColumns,
     {
       headerName: "Total",
       valueGetter: (params: any) => {
-        let total = 1;
-        games.games.forEach((game) => {
-          total *= params.data[game.name];
-        });
-        return total;
+        return calculateTotalScore(games, params.data);
       },
       cellStyle: { textAlign: "right" },
       width: 100,
@@ -48,15 +53,24 @@ const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
       cellDataType: "number",
     },
   ];
+}
 
-  const rowData = games.players.map((player) => {
-    const playerData: Record<string, any> = { player };
-    games.games.forEach((game) => {
-      playerData[game.name] = game.scores[player];
+const BjorliGame: React.FC<BjorliGameProps> = ({ games }) => {
+  const columnDefs = useMemo(() => getColumnDefinitions(games), [games]);
+
+  const rowData = useMemo(() => {
+    return games.players.map((player) => {
+      const playerData = games.games.reduce((data, game) => {
+        data[game.name] = game.scores[player];
+        return data;
+      }, {} as Record<string, number>);
+
+      return {
+        player,
+        ...playerData,
+      };
     });
-
-    return playerData;
-  });
+  }, [games]);
 
   return (
     <div style={{ height: "500px" }}>
