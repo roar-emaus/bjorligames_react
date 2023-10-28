@@ -1,7 +1,5 @@
 #root {
-  /* max-width: 1680px; */
-  width: 100%;
-  /* min-width: 100vh; */
+  /* max-width: 1280px; */
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -41,11 +39,4 @@
 
 .read-the-docs {
   color: #888;
-}
-
-.ag-header-cell-label {
-  justify-content: center;
-  white-space: normal;
-  word-wrap: normal; /*break-word;*/
-  /* word-break: break-word; */
 }
