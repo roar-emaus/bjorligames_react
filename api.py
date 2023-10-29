@@ -33,15 +33,12 @@ def get_locked_games(data_path: Path) -> List[BjorliGame]:
 
 
 def get_newest_version_path(directory_path: Path) -> Optional[Path]:
-    # Get all files that match the format {bjorli_game.date}_*.csv
     matching_files = list(directory_path.glob(f"*.csv"))
-    # If no matching files, return None
     if not matching_files:
         return None
-    # Identify the file with the largest UNIX timestamp
     newest_file = max(matching_files, key=lambda x: int(x.stem.split('_')[-1]))
-    print(newest_file)
     return newest_file
+
 
 def get_all_game_paths(data_path: Path) -> List[Path]:
     return [filename for filename in data_path.iterdir() if filename.match("*.csv")]
@@ -55,7 +52,6 @@ def csv_to_bjorligame(file_path: Path) -> BjorliGame:
     
     if "locked" in str(file_path):
         locked = True
-    print(date, locked)
     return BjorliGame(date=date, locked=locked, games=games, players=list(players_scores.keys()))
 
 def parse_csv(file_path: Path) -> (List[str], Dict[str, List[int]]):
@@ -139,7 +135,7 @@ DATA_STORAGE = {
 
 @app.on_event("startup")
 async def load_data_on_startup():
-    locked_path = Path(os.environ.get("LOCKED_PATH", ""))
+    locked_path = Path(os.environ.get("DATA_PATH", ""))/'locked'
     all_locked_games = get_locked_games(locked_path)
     for game in all_locked_games:
         game_data = game.json()
@@ -169,7 +165,6 @@ async def get_date_data(date: str) -> BjorliGame:
     except ValidationError:
         raise HTTPException(status_code=400, detail="Invalid date format")
 
-    print(f"Called /date/{validated_date}")
     games = DATA_STORAGE['games'].get(validated_date.date)
 
     if not games:
@@ -184,14 +179,11 @@ async def get_date_data(date: str) -> BjorliGame:
 @app.get("/dates")
 async def get_dates() -> List[str]:
     all_dates = DATA_STORAGE['dates']
-    print("Called /dates", all_dates)
     return sorted(list(set(date for date in all_dates)))[::-1]
 
 
 @app.post("/game")
 async def add_game(game: BjorliGame):
-    print("Called /game", game.date)
-
     if is_game_locked(game.date):
         print("Cannot modify a locked game")
         raise HTTPException(status_code=400, detail="Cannot modify a locked game")
@@ -200,26 +192,9 @@ async def add_game(game: BjorliGame):
     DATA_STORAGE['dates'].append(game.date)
     DATA_STORAGE['latest_date'] = game.date
     
-    bjorligame_to_csv(game, Path(os.environ.get("LOCKED_PATH", "")).parent)  # Save to the same directory where the `locked` folder is
+    bjorligame_to_csv(game, Path(os.environ.get("DATA_PATH", "")))  
 
     return {"status": "success", "message": "Game modified successfully"}
-
-@app.post("/lock/{date}")
-async def lock_game(date: str):
-    try:
-        validated_date = DateQuery(date=date)
-    except ValidationError:
-        raise HTTPException(status_code=400, detail="Invalid date format")
-
-    games = DATA_STORAGE['games'].get(validated_date.date)
-    if not games:
-        raise HTTPException(status_code=404, detail="Game data not found for this date")
-    
-    latest_game = games[-1]
-    latest_game_instance = BjorliGame.parse_raw(latest_game)
-    latest_game_instance.locked = True
-    games[-1] = latest_game_instance.json()  # Update the game as locked
-    return {"status": "success", "message": "Game locked successfully"}
 
 
 if __name__ == "__main__":
@@ -228,7 +203,7 @@ if __name__ == "__main__":
     
     # Initialize the argument parser
     parser = argparse.ArgumentParser(description="FastAPI App with Command-Line Arguments")
-    parser.add_argument("--locked", default=None, help="The path of the locked scores")
+    parser.add_argument("--data_path", default=None, help="The path of the data folder")
     args = parser.parse_args()
-    os.environ["LOCKED_PATH"] = args.locked
+    os.environ["DATA_PATH"] = args.data_path
     uvicorn.run('api:app', host='0.0.0.0', port=8000, reload=True)

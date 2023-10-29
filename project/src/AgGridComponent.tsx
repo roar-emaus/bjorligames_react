@@ -1,5 +1,3 @@
-// AgGridComponent.tsx
-
 import React, { useEffect, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -9,8 +7,8 @@ import { getDates, getDateData, sendGame, BjorliGame, Game } from './Api';
 const AgGridComponent: React.FC = () => {
     const [gridApi, setGridApi] = useState<any>(null);
     const [gridColumnApi, setGridColumnApi] = useState<any>(null);
-    const [rowData, setRowData] = useState<any[] | null>(null);
-    const [columnDefs, setColumnDefs] = useState<any[] | null>(null);
+    const [rowData, setRowData] = useState<any[]>([]);
+    const [columnDefs, setColumnDefs] = useState<any[]>([]);
 
     const [dates, setDates] = useState<string[]>([]);
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -64,7 +62,7 @@ const AgGridComponent: React.FC = () => {
                   precision: 0,
                 },
                 cellDataType: "number",
-            });
+            }as any);
         });
         
         // Add the "Total" column
@@ -152,7 +150,7 @@ const AgGridComponent: React.FC = () => {
         }
     
         // Get the current data from the grid
-        const rowDataArray = [];
+        const rowDataArray: any[] = [];
         gridApi.forEachNode(node => rowDataArray.push(node.data));
         const currentRowData = rowDataArray;
         // Convert grid data to BjorliGame object
@@ -198,7 +196,7 @@ const AgGridComponent: React.FC = () => {
     };
 
     return (
-        <div style={{width: '100%'}}>
+        <>
             <div style={{ marginBottom: '10px', width: '100%' }}>
                 <label>Velg dato: </label>
                 <select
@@ -212,11 +210,11 @@ const AgGridComponent: React.FC = () => {
                     ))}
                 </select>
             </div>
-                    {/* Button for adding a player */}
-        <div style={{ marginBottom: '10px' }}>
-            <button onClick={addNewPlayer}>Ny Spiller</button>        <button onClick={addNewGame}>Nytt Spill</button>
-            <button onClick={sendDataToApi}>Send Data</button>
-        </div>
+            <div style={{ marginBottom: '10px' }}>
+                <button onClick={addNewPlayer}>Ny Spiller</button>
+                <button onClick={addNewGame}>Nytt Spill</button>
+                <button onClick={sendDataToApi}>Send Data</button>
+            </div>
             <div className="ag-theme-alpine" style={{ height: '100%', width: '100%' }}>
                 <AgGridReact
                     domLayout='autoHeight'
@@ -227,7 +225,7 @@ const AgGridComponent: React.FC = () => {
                     cellClass: 'ag-right-aligned-cell'  }}
                 />
             </div>
-        </div>
+        </>
     );
 }
 
