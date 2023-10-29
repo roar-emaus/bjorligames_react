@@ -184,6 +184,7 @@ async def get_dates() -> List[str]:
 
 @app.post("/game")
 async def add_game(game: BjorliGame):
+    print(game)
     if is_game_locked(game.date):
         print("Cannot modify a locked game")
         raise HTTPException(status_code=400, detail="Cannot modify a locked game")

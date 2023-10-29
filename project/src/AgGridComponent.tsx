@@ -180,7 +180,6 @@ const AgGridComponent: React.FC = () => {
         try {
             // Send the BjorliGame data using Api.addGame
             const response = await sendGame(bjorliGame);
-            console.log("Response:", response);
             if (response.status !== "success") {
                 throw new Error("Klarte ikke sende data");
             }

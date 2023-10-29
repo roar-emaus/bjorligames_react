@@ -8,7 +8,6 @@ export const getPlaceholderGame = async (): Promise<BjorliGame> => {
 
 export const getDateData = async (date: string): Promise<BjorliGame> => {
     const response = await fetch(`${BASE_URL}/date/${date}`);
-    console.log(date, response)
     return await response.json();
 }
 
@@ -18,7 +17,6 @@ export const getDates = async (): Promise<string[]> => {
 }
 
 export const sendGame = async (game: BjorliGame) => {
-    console.log(game);
     const response = await fetch(`${BASE_URL}/game`, {
         method: 'POST',
         headers: {
