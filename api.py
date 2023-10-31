@@ -189,7 +189,7 @@ async def get_date_data(date: str) -> BjorliGame:
             players=["No name"],
         )
     latest_game = games[-1]
-    return BjorliGame.parse_raw(latest_game)
+    return BjorliGame.model_validate_json(latest_game)
 
 
 @api.get("/dates")
