@@ -3,7 +3,7 @@ import os
 import time
 from pathlib import Path
 from typing import Dict, List, Optional
-
+from io import StringIO
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -111,11 +111,30 @@ def is_game_locked(date: str) -> bool:
     if not games:
         return False
     latest_game = games[-1]
-    latest_game_instance = BjorliGame.parse_raw(latest_game)
+    latest_game_instance = BjorliGame.model_validate_json(latest_game)
     return latest_game_instance.locked
 
 
-def bjorligame_to_csv(bjorli_game: BjorliGame, save_path: Path):
+def bjorligame_to_csv(bjorli_game: BjorliGame) -> str:
+    # Construct CSV data
+    header = ["Player"] + [game.name for game in bjorli_game.games]
+
+    rows = []
+    for player in bjorli_game.players:
+        row = [player]
+        for game in bjorli_game.games:
+            row.append(game.scores.get(player, 0))  # Default score to 0 if not present
+        rows.append(row)
+
+    # Convert rows to CSV
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(header)
+    writer.writerows(rows)
+    
+    return output.getvalue()
+
+def save_bjorligame_to_csv(bjorli_game: BjorliGame, save_path: Path):
     # Generate filename with the date and a UNIX timestamp
     filename = f"{bjorli_game.date.replace('-','_')}_{int(time.time())}.csv"
     file_path = save_path / filename
@@ -129,7 +148,6 @@ def bjorligame_to_csv(bjorli_game: BjorliGame, save_path: Path):
         for game in bjorli_game.games:
             row.append(game.scores.get(player, 0))  # Default score to 0 if not present
         rows.append(row)
-
     # Write to CSV file
     with open(file_path, "w", newline="") as csv_file:
         writer = csv.writer(csv_file)
@@ -198,6 +216,20 @@ async def get_dates() -> List[str]:
     print(all_dates)
     return sorted(list(set(date for date in all_dates)))[::-1]
 
+@api.get("/csv/{date}")
+async def get_csv(date: str) -> str:
+    try:
+        validated_date = DateQuery(date=date)
+    except ValidationError:
+        raise HTTPException(status_code=400, detail="Invalid date format")
+
+    games = DATA_STORAGE["games"].get(validated_date.date)
+
+    if not games:
+        return ""
+    latest_game = games[-1]
+    latest_game_instance = BjorliGame.model_validate_json(latest_game)
+    return bjorligame_to_csv(latest_game_instance)
 
 @api.post("/game")
 async def add_game(game: BjorliGame):
@@ -210,7 +242,7 @@ async def add_game(game: BjorliGame):
     DATA_STORAGE["dates"].append(game.date)
     DATA_STORAGE["latest_date"] = game.date
 
-    bjorligame_to_csv(game, Path(os.environ.get("DATA_PATH", "")))
+    save_bjorligame_to_csv(game, Path(os.environ.get("DATA_PATH", "")))
 
     return {"status": "success", "message": "Game modified successfully"}
 
