@@ -292,4 +292,4 @@ if __name__ == "__main__":
     parser.add_argument("--data_path", default=None, help="The path of the data folder")
     args = parser.parse_args()
     os.environ["DATA_PATH"] = args.data_path
-    uvicorn.run("api:app", host="0.0.0.0", port=80, reload=True)
+    uvicorn.run("api:app", host="0.0.0.0", port=80)
