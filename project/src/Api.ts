@@ -1,5 +1,6 @@
 
-const BASE_URL = 'https://bjorli.dypnet.no/api';  // Change this if your server is hosted elsewhere
+//const BASE_URL = 'https://bjorli.dypnet.no/api';  // Change this if your server is hosted elsewhere
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 export const getPlaceholderGame = async (): Promise<BjorliGame> => {
     const response = await fetch(`${BASE_URL}/date/`);
