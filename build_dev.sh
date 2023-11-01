@@ -1,8 +1,14 @@
-bc=$(buildah from docker.io/library/archlinux)
-buildah run $bc pacman --noconfirm -Syy
-buildah run $bc pacman --noconfirm -S npm uvicorn python-fastapi python-pydantic ipython
-#buildah run $bc npm create -y vite@latest bjorligames -- --template react
-#buildah run --workingdir=/bjorligames $bc npm install
+#!/bin/bash
+set -x
+set -e
 
-buildah commit $bc react-dev
-buildah rm $bc
+# Build stage using Alpine
+bc_build=$(buildah from docker.io/library/alpine:latest)
+buildah run $bc_build apk add --no-cache git npm python3 py3-pip
+buildah run $bc_build pip3 install uvicorn[standard] fastapi pydantic gunicorn
+
+buildah run $bc_build git clone https://github.com/roar-emaus/bjorligames_react.git
+buildah config --workingdir=/bjorligames_react/project $bc_build
+buildah run $bc_build npm install
+buildah commit $bc_build localhost/bjorligames-dev
+buildah rm $bc_build
