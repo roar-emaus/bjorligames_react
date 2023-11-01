@@ -1,5 +1,5 @@
 
-const BASE_URL = 'http://localhost:8000/api';  // Change this if your server is hosted elsewhere
+const BASE_URL = 'https://bjorli.dypnet.no/api';  // Change this if your server is hosted elsewhere
 
 export const getPlaceholderGame = async (): Promise<BjorliGame> => {
     const response = await fetch(`${BASE_URL}/date/`);
